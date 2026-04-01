@@ -1,24 +1,35 @@
 package template
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/goccy/go-yaml"
 )
 
-func Init() {
-	const ConfigPath = "config.yaml"
-	var Config struct {
-		Version string `yaml:"version"`
+type Config struct {
+	Version string `yaml:"version"`
+}
+
+func Init(path string) *Config {
+	cfg := newConfig()
+	if path == "" {
+		return cfg
 	}
-	bytes, err := os.ReadFile(ConfigPath)
+
+	bytes, err := os.ReadFile(path)
 	if err != nil {
 		panic(err)
 	}
-	err = yaml.Unmarshal(bytes, &Config)
+
+	err = yaml.Unmarshal(bytes, cfg)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("Version: %s\n", Config.Version)
+	return cfg
+}
+
+func newConfig() *Config {
+	return &Config{
+		Version: "0.1.0",
+	}
 }

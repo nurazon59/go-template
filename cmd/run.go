@@ -14,11 +14,10 @@ var CLI struct {
 
 func Run() {
 	ctx := kong.Parse(&CLI)
+	_ = template.Init("./testdata/config.yaml")
 	switch ctx.Command() {
 	case "version":
 		fmt.Println("0.1.0")
-	case "config":
-		template.Init()
 	default:
 		panic(ctx.Command())
 	}
