@@ -4,10 +4,12 @@ import (
 	"fmt"
 
 	"github.com/alecthomas/kong"
+	config "github.com/nurazon59/go-template"
 )
 
 var CLI struct {
 	Version struct{} `cmd:"" help:"Show version."`
+	Config  struct{} `cmd:"" help:"Show config."`
 }
 
 func main() {
@@ -15,6 +17,8 @@ func main() {
 	switch ctx.Command() {
 	case "version":
 		fmt.Println("0.1.0")
+	case "config":
+		config.Init()
 	default:
 		panic(ctx.Command())
 	}
