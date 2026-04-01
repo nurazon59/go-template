@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/alecthomas/kong"
-	config "github.com/nurazon59/go-template"
+	template "github.com/nurazon59/go-template"
 )
 
 var CLI struct {
@@ -18,7 +18,7 @@ func main() {
 	case "version":
 		fmt.Println("0.1.0")
 	case "config":
-		config.Init()
+		template.Init()
 	default:
 		panic(ctx.Command())
 	}
