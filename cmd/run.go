@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"fmt"
@@ -12,7 +12,7 @@ var CLI struct {
 	Config  struct{} `cmd:"" help:"Show config."`
 }
 
-func main() {
+func Run() {
 	ctx := kong.Parse(&CLI)
 	switch ctx.Command() {
 	case "version":
