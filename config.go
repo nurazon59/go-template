@@ -1,35 +1,40 @@
 package template
 
 import (
+	"errors"
+	"io/fs"
 	"os"
 
 	"github.com/goccy/go-yaml"
 )
 
 type Config struct {
-	Version string `yaml:"version"`
+	Version int `yaml:"version"`
 }
 
-func Init(path string) *Config {
-	cfg := newConfig()
+func Load(path string) (*Config, error) {
+	cfg := Default()
 	if path == "" {
-		return cfg
+		return cfg, nil
 	}
 
 	bytes, err := os.ReadFile(path)
 	if err != nil {
-		panic(err)
+		if errors.Is(err, fs.ErrNotExist) {
+			return cfg, nil
+		}
+		return nil, err
 	}
 
 	err = yaml.Unmarshal(bytes, cfg)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return cfg
+	return cfg, nil
 }
 
-func newConfig() *Config {
+func Default() *Config {
 	return &Config{
-		Version: "0.1.0",
+		Version: 1,
 	}
 }

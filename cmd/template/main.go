@@ -1,7 +1,15 @@
 package main
 
-import "github.com/nurazon59/go-template/cmd"
+import (
+	"fmt"
+	"os"
+
+	"github.com/nurazon59/go-template/cmd"
+)
 
 func main() {
-	cmd.Run()
+	if err := cmd.Run(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 }
