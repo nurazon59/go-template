@@ -1,6 +1,7 @@
 package template
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -20,11 +21,25 @@ func TestConfig(t *testing.T) {
 			configFile: filepath.Join(t.TempDir(), "missing.yaml"),
 			want:       1,
 		},
+		"invalid yaml": {
+			configFile: func() string {
+				dir := t.TempDir()
+				path := filepath.Join(dir, "broken.yaml")
+				_ = os.WriteFile(path, []byte(": invalid"), 0o644)
+				return path
+			}(),
+			want: 0,
+		},
 	}
 
 	for name, test := range loadTests {
 		t.Run(name, func(t *testing.T) {
 			cfg, err := Load(test.configFile)
+			if name == "invalid yaml" {
+				assert.Error(t, err)
+				assert.Nil(t, cfg)
+				return
+			}
 			assert.NoError(t, err)
 			assert.Equal(t, test.want, cfg.Version)
 		})
