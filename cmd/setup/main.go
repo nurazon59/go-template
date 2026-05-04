@@ -210,9 +210,13 @@ func main() {
 			fmt.Println("zzz/ディレクトリを削除しました")
 		}
 
-		// 自分自身（setupバイナリ）のパスを表示
-		setupBin, _ := os.Executable()
-		fmt.Printf("setupバイナリを削除してください: %s\n", setupBin)
+		// setupディレクトリを削除
+		setupDir := filepath.Join(rootDir, "cmd", "setup")
+		if err := os.RemoveAll(setupDir); err == nil {
+			fmt.Println("cmd/setup/ディレクトリを削除しました")
+		} else {
+			fmt.Printf("cmd/setup/ディレクトリを手動で削除してください: %v\n", err)
+		}
 
 		fmt.Println()
 		fmt.Println("変更を適用しました。以下の確認を実行してください:")
