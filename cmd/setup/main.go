@@ -13,8 +13,8 @@ import (
 )
 
 var cli struct {
-	Apply  bool `help:"実際に変更を適用する"`
-	DryRun bool `help:"変更内容を表示するのみ（デフォルト）"`
+	Apply  bool `help:"Apply changes"`
+	DryRun bool `help:"Show changes only (default)"`
 }
 
 type Change struct {
@@ -54,23 +54,23 @@ type Inputs struct {
 }
 
 func gatherInputs() Inputs {
-	rawAppName := promptInput("アプリケーション名（バイナリ名）", "myapp")
+	rawAppName := promptInput("Application name (binary name)", "myapp")
 	appName := strings.ToLower(rawAppName)
 	re := regexp.MustCompile(`[^a-z0-9-]`)
 	appName = re.ReplaceAllString(appName, "-")
 	appName = strings.Trim(appName, "-")
 
 	if appName == "" {
-		fmt.Fprintln(os.Stderr, "Error: アプリケーション名は必須です")
+		fmt.Fprintln(os.Stderr, "Error: application name is required")
 		os.Exit(1)
 	}
 
-	githubUser := promptInput("GitHubユーザー名", "username")
+	githubUser := promptInput("GitHub username", "username")
 	defaultModule := fmt.Sprintf("github.com/%s/%s", githubUser, appName)
 	modulePath := promptInput("Go module path", defaultModule)
 
 	if modulePath == "" {
-		fmt.Fprintln(os.Stderr, "Error: module pathは必須です")
+		fmt.Fprintln(os.Stderr, "Error: module path is required")
 		os.Exit(1)
 	}
 
@@ -81,7 +81,7 @@ func gatherInputs() Inputs {
 
 	xdgPath := appName
 
-	rawPkg := promptInput("ルートパッケージ名（config.go等）", appName)
+	rawPkg := promptInput("Root package name (e.g. config.go)", appName)
 	rePkg := regexp.MustCompile(`[^a-z0-9_]`)
 	packageName := rePkg.ReplaceAllString(rawPkg, "_")
 	packageName = strings.Trim(packageName, "_")
@@ -147,46 +147,37 @@ func main() {
 
 	rootDir, _ := filepath.Abs(".")
 
-	// go.mod
-	replaceInFile(filepath.Join(rootDir, "go.mod"), oldModule, inputs.ModulePath, "module path更新", dryRun)
+	replaceInFile(filepath.Join(rootDir, "go.mod"), oldModule, inputs.ModulePath, "update module path", dryRun)
 
-	// cmd/template → cmd/<app>
 	oldCmdDir := filepath.Join(rootDir, "cmd", "template")
 	newCmdDir := filepath.Join(rootDir, "cmd", inputs.AppName)
 
-	replaceInFile(filepath.Join(oldCmdDir, "main.go"), oldModule+"/cmd", inputs.ModulePath+"/cmd", "main.goのimportパス更新", dryRun)
-	replaceInFile(filepath.Join(oldCmdDir, "main_test.go"), oldApp, inputs.AppName, "テストのバイナリ名更新", dryRun)
+	replaceInFile(filepath.Join(oldCmdDir, "main.go"), oldModule+"/cmd", inputs.ModulePath+"/cmd", "update import path in main.go", dryRun)
+	replaceInFile(filepath.Join(oldCmdDir, "main_test.go"), oldApp, inputs.AppName, "update binary name in test", dryRun)
 	renameDir(oldCmdDir, newCmdDir, dryRun)
 
-	// cmd/run.go
 	runFile := filepath.Join(rootDir, "cmd", "run.go")
-	replaceInFile(runFile, oldModule, inputs.ModulePath, "run.goのimportパス更新", dryRun)
-	replaceInFile(runFile, oldPkg+"\"", inputs.PackageName+"\"", "run.goのimportエイリアス更新", dryRun)
-	replaceInFile(runFile, oldEnv, inputs.EnvName, "環境変数名更新", dryRun)
-	replaceInFile(runFile, oldXdg, inputs.XdgPath, "XDGパス更新", dryRun)
-	replaceInFile(runFile, fmt.Sprintf("kong.Name(\"%s\")", oldApp), fmt.Sprintf("kong.Name(\"%s\")", inputs.AppName), "kong.Name更新", dryRun)
-	replaceInFile(runFile, oldPkg+".Load", inputs.PackageName+".Load", "run.goのLoad呼び出し更新", dryRun)
+	replaceInFile(runFile, oldModule, inputs.ModulePath, "update import path in run.go", dryRun)
+	replaceInFile(runFile, oldPkg+"\"", inputs.PackageName+"\"", "update import alias in run.go", dryRun)
+	replaceInFile(runFile, oldEnv, inputs.EnvName, "update env var name", dryRun)
+	replaceInFile(runFile, oldXdg, inputs.XdgPath, "update XDG path", dryRun)
+	replaceInFile(runFile, fmt.Sprintf("kong.Name(\"%s\")", oldApp), fmt.Sprintf("kong.Name(\"%s\")", inputs.AppName), "update kong.Name", dryRun)
+	replaceInFile(runFile, oldPkg+".Load", inputs.PackageName+".Load", "update Load call in run.go", dryRun)
 
-	// config.go
-	replaceInFile(filepath.Join(rootDir, "config.go"), "package "+oldPkg, "package "+inputs.PackageName, "config.goパッケージ名更新", dryRun)
+	replaceInFile(filepath.Join(rootDir, "config.go"), "package "+oldPkg, "package "+inputs.PackageName, "update package name in config.go", dryRun)
 
-	// config_test.go
-	replaceInFile(filepath.Join(rootDir, "config_test.go"), "package "+oldPkg, "package "+inputs.PackageName, "config_test.goパッケージ名更新", dryRun)
+	replaceInFile(filepath.Join(rootDir, "config_test.go"), "package "+oldPkg, "package "+inputs.PackageName, "update package name in config_test.go", dryRun)
 
-	// Taskfile.yml
-	replaceInFile(filepath.Join(rootDir, "Taskfile.yml"), oldApp, inputs.AppName, "Taskfileのバイナリ名更新", dryRun)
-	replaceInFile(filepath.Join(rootDir, "Taskfile.yml"), "cmd/template", "cmd/"+inputs.AppName, "Taskfileのbuildパス更新", dryRun)
+	replaceInFile(filepath.Join(rootDir, "Taskfile.yml"), oldApp, inputs.AppName, "update binary name in Taskfile", dryRun)
+	replaceInFile(filepath.Join(rootDir, "Taskfile.yml"), "cmd/template", "cmd/"+inputs.AppName, "update build path in Taskfile", dryRun)
 
-	// .goreleaser.yaml
-	replaceInFile(filepath.Join(rootDir, ".goreleaser.yaml"), "cmd/template", "cmd/"+inputs.AppName, "goreleaserのmainパス更新", dryRun)
+	replaceInFile(filepath.Join(rootDir, ".goreleaser.yaml"), "cmd/template", "cmd/"+inputs.AppName, "update main path in goreleaser", dryRun)
 
-	// README.md
-	replaceInFile(filepath.Join(rootDir, "README.md"), oldApp, inputs.AppName, "READMEのアプリ名更新", dryRun)
-	replaceInFile(filepath.Join(rootDir, "README.md"), oldEnv, inputs.EnvName, "READMEの環境変数名更新", dryRun)
-	replaceInFile(filepath.Join(rootDir, "README.md"), oldXdg, inputs.XdgPath, "READMEのXDGパス更新", dryRun)
-	replaceInFile(filepath.Join(rootDir, "README.md"), "cmd/template", "cmd/"+inputs.AppName, "READMEのパス更新", dryRun)
+	replaceInFile(filepath.Join(rootDir, "README.md"), oldApp, inputs.AppName, "update app name in README", dryRun)
+	replaceInFile(filepath.Join(rootDir, "README.md"), oldEnv, inputs.EnvName, "update env var name in README", dryRun)
+	replaceInFile(filepath.Join(rootDir, "README.md"), oldXdg, inputs.XdgPath, "update XDG path in README", dryRun)
+	replaceInFile(filepath.Join(rootDir, "README.md"), "cmd/template", "cmd/"+inputs.AppName, "update path in README", dryRun)
 
-	// bin/template → bin/<app>
 	oldBin := filepath.Join(rootDir, "bin", "template")
 	newBin := filepath.Join(rootDir, "bin", inputs.AppName)
 	if _, err := os.Stat(oldBin); err == nil {
@@ -195,33 +186,31 @@ func main() {
 
 	if dryRun {
 		fmt.Println()
-		fmt.Println("上記の変更が適用されます。実際に適用するには --apply を付けて実行してください。")
+		fmt.Println("The above changes will be applied. Run with --apply to actually apply them.")
 	} else {
-		// setupスクリプトと一時ファイルを削除
 		setupSh := filepath.Join(rootDir, "scripts", "setup.sh")
 		if _, err := os.Stat(setupSh); err == nil {
 			os.Remove(setupSh)
-			fmt.Println("setup.shを削除しました")
+			fmt.Println("Removed setup.sh")
 		}
 
 		zzzDir := filepath.Join(rootDir, "zzz")
 		if _, err := os.Stat(zzzDir); err == nil {
 			os.RemoveAll(zzzDir)
-			fmt.Println("zzz/ディレクトリを削除しました")
+			fmt.Println("Removed zzz/ directory")
 		}
 
-		// setupディレクトリを削除
 		setupDir := filepath.Join(rootDir, "cmd", "setup")
 		if err := os.RemoveAll(setupDir); err == nil {
-			fmt.Println("cmd/setup/ディレクトリを削除しました")
+			fmt.Println("Removed cmd/setup/ directory")
 		} else {
-			fmt.Printf("cmd/setup/ディレクトリを手動で削除してください: %v\n", err)
+			fmt.Printf("Please manually delete cmd/setup/ directory: %v\n", err)
 		}
 
 		fmt.Println()
-		fmt.Println("変更を適用しました。以下の確認を実行してください:")
+		fmt.Println("Changes applied. Please run the following:")
 		fmt.Println("  1. go mod tidy")
 		fmt.Println("  2. task ci")
-		fmt.Println("  3. git status で変更確認")
+		fmt.Println("  3. git status to review changes")
 	}
 }
