@@ -158,7 +158,7 @@ func main() {
 
 	runFile := filepath.Join(rootDir, "cmd", "run.go")
 	replaceInFile(runFile, oldModule, inputs.ModulePath, "update import path in run.go", dryRun)
-	replaceInFile(runFile, oldPkg+"\"", inputs.PackageName+"\"", "update import alias in run.go", dryRun)
+	replaceInFile(runFile, oldPkg+" \"", inputs.PackageName+" \"", "update import alias in run.go", dryRun)
 	replaceInFile(runFile, oldEnv, inputs.EnvName, "update env var name", dryRun)
 	replaceInFile(runFile, oldXdg, inputs.XdgPath, "update XDG path", dryRun)
 	replaceInFile(runFile, fmt.Sprintf("kong.Name(\"%s\")", oldApp), fmt.Sprintf("kong.Name(\"%s\")", inputs.AppName), "update kong.Name", dryRun)
