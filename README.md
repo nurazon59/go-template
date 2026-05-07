@@ -5,8 +5,8 @@
 ## Usage
 
 ```bash
-go run ./cmd/template/main.go --help
-go run ./cmd/template/main.go --version
+go run ./main.go --help
+go run ./main.go --version
 ```
 
 ### Config

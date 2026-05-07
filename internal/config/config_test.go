@@ -1,4 +1,4 @@
-package template
+package config
 
 import (
 	"os"

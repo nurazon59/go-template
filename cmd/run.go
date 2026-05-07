@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/adrg/xdg"
 	"github.com/alecthomas/kong"
-	template "github.com/nurazon59/go-template"
+	template "github.com/nurazon59/go-template/internal/config"
 )
 
 const appVersion = "v0.1.0"
