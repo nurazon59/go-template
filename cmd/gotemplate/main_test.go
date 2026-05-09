@@ -16,8 +16,8 @@ func buildBinary(t *testing.T) string {
 	dir := t.TempDir()
 	bin := filepath.Join(dir, "go-template")
 
-	cmd := exec.Command("go", "build", "-o", bin, ".")
-	cmd.Dir = "."
+	cmd := exec.Command("go", "build", "-o", bin, "./cmd/gotemplate")
+	cmd.Dir = "../.."
 	cmd.Env = append(os.Environ(), "CGO_ENABLED=0")
 
 	out, err := cmd.CombinedOutput()

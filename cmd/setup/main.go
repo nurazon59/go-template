@@ -143,35 +143,30 @@ func main() {
 	oldApp := "go-template"
 	oldEnv := "GO_TEMPLATE_CONFIG"
 	oldXdg := "go-template"
-	oldPkg := "template"
 
 	rootDir, _ := filepath.Abs(".")
 
 	replaceInFile(filepath.Join(rootDir, "go.mod"), oldModule, inputs.ModulePath, "update module path", dryRun)
 
-	replaceInFile(filepath.Join(rootDir, "main.go"), oldModule+"/cmd", inputs.ModulePath+"/cmd", "update import path in main.go", dryRun)
-	replaceInFile(filepath.Join(rootDir, "main_test.go"), oldApp, inputs.AppName, "update binary name in test", dryRun)
+	replaceInFile(filepath.Join(rootDir, "cmd", "gotemplate", "main.go"), oldModule, inputs.ModulePath, "update import path in main.go", dryRun)
+	replaceInFile(filepath.Join(rootDir, "cmd", "gotemplate", "main_test.go"), oldApp, inputs.AppName, "update binary name in test", dryRun)
 
-	runFile := filepath.Join(rootDir, "cmd", "run.go")
+	runFile := filepath.Join(rootDir, "run.go")
 	replaceInFile(runFile, oldModule, inputs.ModulePath, "update import path in run.go", dryRun)
-	replaceInFile(runFile, oldPkg+" \"", inputs.PackageName+" \"", "update import alias in run.go", dryRun)
 	replaceInFile(runFile, oldEnv, inputs.EnvName, "update env var name", dryRun)
 	replaceInFile(runFile, oldXdg, inputs.XdgPath, "update XDG path", dryRun)
 	replaceInFile(runFile, fmt.Sprintf("kong.Name(\"%s\")", oldApp), fmt.Sprintf("kong.Name(\"%s\")", inputs.AppName), "update kong.Name", dryRun)
-	replaceInFile(runFile, oldPkg+".Load", inputs.PackageName+".Load", "update Load call in run.go", dryRun)
 
 	configDir := filepath.Join(rootDir, "internal", "config")
-	replaceInFile(filepath.Join(configDir, "config.go"), "package "+oldPkg, "package "+inputs.PackageName, "update package name in config.go", dryRun)
-	replaceInFile(filepath.Join(configDir, "config_test.go"), "package "+oldPkg, "package "+inputs.PackageName, "update package name in config_test.go", dryRun)
+	_ = configDir
 
 	replaceInFile(filepath.Join(rootDir, "Taskfile.yml"), oldApp, inputs.AppName, "update binary name in Taskfile", dryRun)
 
 	replaceInFile(filepath.Join(rootDir, "README.md"), oldApp, inputs.AppName, "update app name in README", dryRun)
 	replaceInFile(filepath.Join(rootDir, "README.md"), oldEnv, inputs.EnvName, "update env var name in README", dryRun)
 	replaceInFile(filepath.Join(rootDir, "README.md"), oldXdg, inputs.XdgPath, "update XDG path in README", dryRun)
-	replaceInFile(filepath.Join(rootDir, "README.md"), "cmd/template/main.go", "main.go", "update path in README", dryRun)
 
-	oldBin := filepath.Join(rootDir, "bin", "template")
+	oldBin := filepath.Join(rootDir, "bin", "go-template")
 	newBin := filepath.Join(rootDir, "bin", inputs.AppName)
 	if _, err := os.Stat(oldBin); err == nil {
 		renameDir(oldBin, newBin, dryRun)

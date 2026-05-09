@@ -1,9 +1,9 @@
-package cmd
+package gotemplate
 
 import (
 	"github.com/adrg/xdg"
 	"github.com/alecthomas/kong"
-	template "github.com/nurazon59/go-template/internal/config"
+	"github.com/nurazon59/go-template/internal/config"
 )
 
 const appVersion = "v0.1.0"
@@ -27,7 +27,7 @@ func Run() error {
 		}
 	}
 
-	_, err := template.Load(configPath)
+	_, err := config.Load(configPath)
 	if err != nil {
 		return err
 	}
