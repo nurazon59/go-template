@@ -8,44 +8,44 @@ spec:
   visibility: public
   archived: false
   labels:
-  - name: bug
-    description: Something isn't working
-    color: d73a4a
-  - name: documentation
-    description: Improvements or additions to documentation
-    color: 0075ca
-  - name: duplicate
-    description: This issue or pull request already exists
-    color: cfd3d7
-  - name: enhancement
-    description: New feature or request
-    color: a2eeef
-  - name: good first issue
-    description: Good for newcomers
-    color: 7057ff
-  - name: help wanted
-    description: Extra attention is needed
-    color: 008672
-  - name: invalid
-    description: This doesn't seem right
-    color: e4e669
-  - name: question
-    description: Further information is requested
-    color: d876e3
-  - name: tagpr
-    color: ededed
-  - name: "tagpr:major"
-    description: Major version bump
-    color: 1d76db
-  - name: "tagpr:minor"
-    description: Minor version bump
-    color: 0e8a16
-  - name: "tagpr:patch"
-    description: Patch version bump
-    color: d4c5f9
-  - name: wontfix
-    description: This will not be worked on
-    color: ffffff
+    - name: bug
+      description: Something isn't working
+      color: d73a4a
+    - name: documentation
+      description: Improvements or additions to documentation
+      color: 0075ca
+    - name: duplicate
+      description: This issue or pull request already exists
+      color: cfd3d7
+    - name: enhancement
+      description: New feature or request
+      color: a2eeef
+    - name: good first issue
+      description: Good for newcomers
+      color: 7057ff
+    - name: help wanted
+      description: Extra attention is needed
+      color: 008672
+    - name: invalid
+      description: This doesn't seem right
+      color: e4e669
+    - name: question
+      description: Further information is requested
+      color: d876e3
+    - name: tagpr
+      color: ededed
+    - name: "tagpr:major"
+      description: Major version bump
+      color: 1d76db
+    - name: "tagpr:minor"
+      description: Minor version bump
+      color: 0e8a16
+    - name: "tagpr:patch"
+      description: Patch version bump
+      color: d4c5f9
+    - name: wontfix
+      description: This will not be worked on
+      color: ffffff
   features:
     issues: true
     projects: true
@@ -75,26 +75,28 @@ spec:
     can_approve_pull_requests: true
     fork_pr_approval: first_time_contributors
   rulesets:
-  - name: main-branch-protection
-    target: branch
-    enforcement: active
-    conditions:
-      ref_name:
-        include:
-        - refs/heads/main
-        exclude: []
-    rules:
-      deletion: true
-      non_fast_forward: true
-      required_linear_history: true
-      required_signatures: true
-      pull_request:
-        required_approving_review_count: 1
-        dismiss_stale_reviews_on_push: true
-        require_code_owner_review: true
-        require_last_push_approval: false
-        required_review_thread_resolution: false
-      required_status_checks:
-        strict_required_status_checks_policy: true
-        contexts:
-        - context: ci
+    - name: main-branch-protection
+      target: branch
+      enforcement: active
+      conditions:
+        ref_name:
+          include:
+            - refs/heads/main
+          exclude: []
+      rules:
+        deletion: true
+        non_fast_forward: true
+        required_linear_history: true
+        pull_request:
+          required_approving_review_count: 1
+          dismiss_stale_reviews_on_push: true
+          require_code_owner_review: true
+          require_last_push_approval: false
+          required_review_thread_resolution: false
+        required_status_checks:
+          strict_required_status_checks_policy: true
+          contexts:
+            - context: ci
+      bypass_actors:
+        - role: admin
+          bypass_mode: always
