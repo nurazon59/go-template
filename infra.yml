@@ -78,6 +78,9 @@ spec:
     - name: main-branch-protection
       target: branch
       enforcement: active
+      bypass_actors:
+        - role: admin
+          bypass_mode: pull_request
       conditions:
         ref_name:
           include:
@@ -97,6 +100,3 @@ spec:
           strict_required_status_checks_policy: true
           contexts:
             - context: ci
-      bypass_actors:
-        - role: admin
-          bypass_mode: always
